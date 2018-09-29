@@ -1,10 +1,13 @@
-from django.shortcuts import render
+import json
+
+from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
 
 from pusher import Pusher
 from decouple import config
 
 from .models import Feed
+from .forms import DocumentForm
 
 # instantiate pusher
 pusher = Pusher(
@@ -26,7 +29,7 @@ def pusher_authentication(request):
 	channel = request.GET.get('channel_name', None)
 	socket_id = request.GET.get('socket_id', None)
 	auth = pusher.authenticate(
-		channnel=channel,
+		channel=channel,
 		socket_id=socket_id
 	)
 
@@ -39,15 +42,17 @@ def push_feed(request):
 	if request.method == "POST":
 		form = DocumentForm(request.POST, request.FILES)
 		if form.is_valid():
+			description = form.cleaned_data.get("description")
+			document = form.cleaned_data.get('document')
+			try:
+				pusher.trigger(
+					'a_channel',
+					'an_event',
+					{'description': description, 'document': str(document)}
+				)
+			except Exception as e:
+				print(e)
 			form.save()
-			Pusher.trigger(
-				'a_channel',
-				'an_event',
-				{
-					'description': f.description,
-					'document': f.document.url
-				}
-			)
 			return HttpResponse('ok')
 		else:
 			return form.ValidationError('form is not valid')
