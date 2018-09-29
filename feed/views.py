@@ -18,7 +18,7 @@ pusher = Pusher(
 def home_view(request):
 	objects = Feed.objects.all().order_by('-id')
 	context = {'objects': objects}
-	return render(request, 'home.html', context)
+	return render(request, 'index.html', context)
 
 
 # function to authenticate private channel
