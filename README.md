@@ -167,3 +167,84 @@ class DocumentForm(forms.ModelForm):
 In the above code block, we have imported our Feed model and used it to create a 
 form. This form will now handle the validation and upload of images to the right 
 folder.
+
+# Feed Urls
+
+We won't be creating a separate ```urls.py``` file in the **feed** folder. Open 
+**photofeed/urls.py** file and make these changes 
+
+```
+from django.contrib import admin
+from django.urls import path
+
+from feed.views import home_view, pusher_authentication, push_feed
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+]
+
+urlpatterns += [
+    path('', index, name='index'),
+    path('push-feed/', push_feed, name='push-feed'),
+    path('push-authentication/', pusher_authentication, name='push-authentication'),
+]
+```
+
+We simply make the entry point to be the index view and the other two urls for their 
+respective views.
+
+# Template
+If you haven't created a static folder create one, the project tree should be like
+On windows, to access the tree structure type in ```tree``` in ```cmd```
+
+```
+├───feed
+│   ├───migrations
+│   │   └───__pycache__
+│   ├───static
+│   │   └───documents
+│   ├───templates
+│   └───__pycache__
+└───photofeed
+    └───__pycache__
+```
+
+Create ```index.html``` file and add this code in it
+
+```
+<html>
+    <head>
+        <title>Django Photo feed</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+        <script src="//js.pusher.com/4.0/pusher.min.js"></script>
+    </head>
+    <body>
+
+        <div class="container">
+            <form  method="post" enctype="multipart/form-data" action="/push_feed" onsubmit="return feed_it()">
+            <input type="hidden" id="csrf" name="csrf" value="{{ csrf_token }}"/>
+            <div class="form-group">
+                    <label for="usr">Image:</label>
+                    <input type="file" id="document" name="document" class="form-control"  required>
+                </div>
+                <div class="form-group">
+                    <label for="pwd">comment:</label>
+                    <input type="text" id="description" name="description"  class="form-control"  required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Feed it</button>
+                </div>
+            </form>
+            <div class="row" id="feeds">
+                {% for doc in all_documents  %}
+                <span>
+                    <h2>{{doc.description}}</h2>
+                    <img  src="{{doc.document}}">
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>
+```
