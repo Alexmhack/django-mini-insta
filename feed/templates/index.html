@@ -54,7 +54,7 @@
 
                 data.append('csrfmiddlewaretoken', document.getElementById('csrf').value);
                 $.post({
-                    url: '/push_feed',
+                    url: {% url 'home' %},
                     data: data,
                     processData: false, // Don't process the files
                     contentType: false, // Set content type to false as jQuery will tell the server it's a query string request
@@ -74,7 +74,7 @@
                 encrypted: true,
                 cluster: 'XXX_APP_CLUSTER',
                 authTransport: 'jsonp',
-                authEndpoint: '/pusher_authentication'
+                authEndpoint: {% url 'push-authentication' %}
             });
             var my_channel = pusher.subscribe('private-a_channel');
             my_channel.bind("an_event", function(doc) {
