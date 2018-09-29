@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+
 from pusher import Pusher
+from decouple import config
 
 from .models import Feed
 
