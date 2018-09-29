@@ -8,8 +8,8 @@
     <body>
 
         <div class="container">
-            <form  method="post" enctype="multipart/form-data" action="/push_feed" onsubmit="return feed_it()">
-            <input type="hidden" id="csrf" name="csrf" value="{{ csrf_token }}"/>
+            <form  method="post" enctype="multipart/form-data" action="{% url 'push-feed' %}" onsubmit="return feed_it()">
+            {% csrf_token %}
             <div class="form-group">
                     <label for="usr">Image:</label>
                     <input type="file" id="document" name="document" class="form-control"  required>
@@ -45,16 +45,17 @@
                 files = event.target.files;
             }
 
-            function feed_it() {
+            function feed_it(e) {
+                e.preventDefault()
                 var data = new FormData();
                 $.each(files, function(key, value) {
                     data.append('document', value);
                 });
-                data.append('description', document.getElementById('description').value);
+                data.append('description', document.getElementById('id_description').value);
 
-                data.append('csrfmiddlewaretoken', document.getElementById('csrf').value);
+                data.append('csrfmiddlewaretoken', document.getElementsByTagName('csrfmiddlewaretoken').value);
                 $.post({
-                    url: {% url 'home' %},
+                    url: {% url 'push-feed' %},
                     data: data,
                     processData: false, // Don't process the files
                     contentType: false, // Set content type to false as jQuery will tell the server it's a query string request
@@ -70,12 +71,14 @@
                 });
                 return false;
             }
-            var pusher = new Pusher('XXX_APP_KEY', {
+
+            var pusher = new Pusher('7c1932a01077b3c719b6', {
                 encrypted: true,
-                cluster: 'XXX_APP_CLUSTER',
+                cluster: 'ap2',
                 authTransport: 'jsonp',
                 authEndpoint: {% url 'push-authentication' %}
             });
+
             var my_channel = pusher.subscribe('private-a_channel');
             my_channel.bind("an_event", function(doc) {
                 alert("message");
