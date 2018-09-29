@@ -29,3 +29,26 @@ def pusher_authentication(request):
 	)
 
 	return JsonResponse(json.dumps(auth), safe=False)
+
+
+# function that triggers pusher request
+def push_feed(request):
+	# check if the method is post
+	if request.method == "POST":
+		form = DocumentForm(request.POST, request.FILES)
+		if form.is_valid():
+			form.save()
+			Pusher.trigger(
+				'a_channel',
+				'an_event',
+				{
+					'description': f.description,
+					'document': f.document.url
+				}
+			)
+			return HttpResponse('ok')
+		else:
+			return form.ValidationError('form is not valid')
+
+	else:
+		return HttpResponse('error, please try again...')
