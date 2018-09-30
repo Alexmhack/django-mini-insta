@@ -8,8 +8,8 @@
     <body>
 
         <div class="container">
-            <form  method="post" enctype="multipart/form-data" action="{% url 'push-feed' %}" onsubmit="return feed_it()">
-            {% csrf_token %}
+            <form  method="post" enctype="multipart/form-data" action="{% url 'push-feed' %}" onsubmit="event.preventDefault(); feed_it();">
+            <input type="hidden" id="csrf" name="csrf" value="{{ csrf_token }}"/>
             <div class="form-group">
                     <label for="usr">Image:</label>
                     <input type="file" id="document" name="document" class="form-control"  required>
@@ -22,14 +22,20 @@
                     <button type="submit" class="btn btn-success">Feed it</button>
                 </div>
             </form>
-            <div class="row" id="feeds">
-                {% for doc in all_documents  %}
-                <span>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4"></div>
+
+                <div class="col-sm-4" id="feeds">
+                {% for doc in objects  %}
                     <h2>{{doc.description}}</h2>
                     <img  src="{{doc.document}}">
-                </span>
                 {% endfor %}
+                </div>
+            
+                <div class="col-sm-4"></div>
             </div>
+        </div>
         </div>
         <script>
             var files;
@@ -45,21 +51,23 @@
                 files = event.target.files;
             }
 
-            function feed_it(e) {
-                e.preventDefault()
+            function feed_it() {
                 var data = new FormData();
                 $.each(files, function(key, value) {
                     data.append('document', value);
                 });
-                data.append('description', document.getElementById('id_description').value);
+                data.append('description', document.getElementById('description').value);
 
-                data.append('csrfmiddlewaretoken', document.getElementsByTagName('csrfmiddlewaretoken').value);
+                csrf_token = document.getElementById('csrf').value;
+                console.log(data['document']);
+                data.append('csrfmiddlewaretoken', document.getElementById('csrf').value);
                 $.post({
                     url: {% url 'push-feed' %},
                     data: data,
                     processData: false, // Don't process the files
                     contentType: false, // Set content type to false as jQuery will tell the server it's a query string request
                     success: function(data) {
+                        console.log(data)
                         if (data == "ok") {
                             alert('done');
                             document.getElementById('description').value = '';
@@ -69,7 +77,7 @@
                         alert('an error occured, please try again later')
                     }
                 });
-                return false;
+                return true;
             }
 
             var pusher = new Pusher('7c1932a01077b3c719b6', {
