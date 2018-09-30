@@ -55,7 +55,7 @@ def push_feed(request):
 			form.save()
 			return HttpResponse('ok')
 		else:
-			return form.ValidationError('form is not valid')
+			return HttpResponse('form is not valid')
 
 	else:
 		return HttpResponse('error, please try again...')
